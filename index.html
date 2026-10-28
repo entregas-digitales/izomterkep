@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>IzomTérkép — +100 Vizuális Térkép</title>
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&family=Poppins:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f8fafc;--bg-alt:#eef4fb;--bg-dark:#0f3857;--bg-dark2:#0a2540;
+  --text:#233447;--text-light:#4a6580;--cta:#da6946;--cta-dark:#c05a38;
+  --accent:#575ecf;--green:#22c55e;--border:#d1dde8;
+  --font-body:'Nunito Sans',sans-serif;--font-head:'Poppins',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;background:var(--bg);color:var(--text);font-family:var(--font-body)}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+body{background:var(--bg)}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit;text-decoration:none}
+
+.fp-container{max-width:900px;margin:0 auto;padding:0 20px}
+.fp-btn{display:inline-block;background:var(--cta);color:#fff;font-family:var(--font-head);font-weight:800;font-size:1rem;letter-spacing:.05em;padding:18px 36px;border-radius:8px;cursor:pointer;border:none;text-transform:uppercase;transition:background .2s,transform .1s;text-align:center}
+.fp-btn:hover{background:var(--cta-dark);transform:translateY(-1px)}
+.fp-btn-full{width:100%;display:block;font-size:1.05rem;padding:20px}
+.fp-check-list{list-style:none}
+.fp-check-list li{padding:8px 0 8px 32px;position:relative;color:var(--text-light);line-height:1.5}
+.fp-check-list li::before{content:"✓";position:absolute;left:0;color:var(--green);font-weight:700}
+
+#fp-sticky{position:fixed;bottom:0;left:0;right:0;background:var(--bg-dark);color:#fff;z-index:999;padding:14px 20px;display:flex;align-items:center;justify-content:center;gap:16px;transition:opacity .3s,transform .3s;box-shadow:0 -2px 12px rgba(0,0,0,.25)}
+#fp-sticky.fp-hidden{opacity:0;transform:translateY(100%);pointer-events:none}
+#fp-sticky a{background:var(--cta);color:#fff;font-family:var(--font-head);font-weight:800;font-size:.9rem;padding:10px 24px;border-radius:6px;white-space:nowrap;text-transform:uppercase}
+
+#fp-hero{background:var(--bg-dark);color:#fff;padding:60px 0 50px;text-align:center}
+.fp-hero-badge{display:inline-block;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:99px;font-size:.75rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:6px 16px;margin-bottom:20px;color:#a8c8e8}
+.fp-hero-title{font-family:var(--font-head);font-weight:900;font-size:clamp(1.6rem,4vw,2.6rem);line-height:1.15;margin-bottom:16px;text-transform:uppercase}
+.fp-hero-sub{font-size:clamp(1rem,2.5vw,1.2rem);line-height:1.6;color:#c5d9ea;max-width:680px;margin:0 auto 28px}
+.fp-hero-stats{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 24px;margin-bottom:32px;color:#a8c8e8;font-size:.9rem}
+.fp-hero-stats span::before{content:"• ";color:var(--cta)}
+.fp-hero-img{max-width:420px;margin:36px auto 0;border-radius:12px;box-shadow:0 20px 60px rgba(0,0,0,.4)}
+
+#fp-preview{background:var(--bg);padding:60px 0;text-align:center}
+.fp-section-label{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:12px}
+.fp-section-title{font-family:var(--font-head);font-size:clamp(1.3rem,3vw,1.9rem);font-weight:800;text-transform:uppercase;line-height:1.2;margin-bottom:16px}
+.fp-section-sub{color:var(--text-light);max-width:580px;margin:0 auto 36px;line-height:1.7}
+.fp-carousel{display:flex;gap:12px;overflow-x:auto;padding:4px 4px 12px;scroll-snap-type:x mandatory;-ms-overflow-style:none;scrollbar-width:none;justify-content:center;flex-wrap:wrap}
+.fp-carousel::-webkit-scrollbar{display:none}
+.fp-carousel-item{flex:0 0 160px;scroll-snap-align:start;background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.1)}
+.fp-carousel-item img{width:100%;aspect-ratio:1;object-fit:cover}
+.fp-carousel-caption{padding:8px;font-size:.8rem;font-weight:600;color:var(--text);text-align:center}
+.fp-demo-img{max-width:420px;margin:24px auto;border-radius:10px;box-shadow:0 4px 20px rgba(0,0,0,.12)}
+
+#fp-compare{background:var(--bg-alt);padding:60px 0}
+.fp-compare-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px}
+.fp-compare-col{background:#fff;border-radius:12px;padding:24px}
+.fp-compare-col.col-bad{border:2px solid #fee2e2}
+.fp-compare-col.col-good{border:2px solid #dcfce7}
+.fp-compare-head{font-family:var(--font-head);font-size:.85rem;font-weight:800;text-transform:uppercase;letter-spacing:.05em;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.col-bad .fp-compare-head{color:#dc2626}
+.col-good .fp-compare-head{color:#16a34a}
+.fp-compare-list{list-style:none}
+.fp-compare-list li{padding:7px 0 7px 28px;position:relative;font-size:.9rem;line-height:1.5;color:var(--text-light)}
+.col-bad .fp-compare-list li::before{content:"✗";position:absolute;left:0;color:#dc2626;font-weight:700}
+.col-good .fp-compare-list li::before{content:"✓";position:absolute;left:0;color:#16a34a;font-weight:700}
+
+#fp-target{background:var(--bg);padding:60px 0;text-align:center}
+.fp-target-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:36px;text-align:left}
+.fp-target-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,.07)}
+.fp-target-img{width:100%;height:200px;object-fit:cover}
+.fp-target-body{padding:20px}
+.fp-target-label{font-family:var(--font-head);font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:10px}
+.fp-target-intro{font-size:.9rem;color:var(--text-light);margin-bottom:14px;line-height:1.6}
+
+#fp-modules{background:var(--bg-dark);color:#fff;padding:60px 0;text-align:center}
+#fp-modules .fp-section-label{color:#a8c8e8}
+#fp-modules .fp-section-title{color:#fff}
+.fp-modules-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;margin-top:32px;text-align:left}
+.fp-module-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:10px;padding:16px 18px}
+.fp-module-num{font-family:var(--font-head);font-size:.7rem;font-weight:800;letter-spacing:.1em;color:var(--cta);text-transform:uppercase;margin-bottom:6px}
+.fp-module-name{font-weight:700;font-size:.95rem;color:#fff;margin-bottom:4px}
+.fp-module-count{font-size:.8rem;color:#7a9dbf}
+
+#fp-inside{background:var(--bg);padding:60px 0;text-align:center}
+.fp-inside-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:32px;text-align:left}
+.fp-inside-item{background:var(--bg-alt);border-radius:10px;padding:18px 20px}
+.fp-inside-num{font-family:var(--font-head);font-size:1.4rem;font-weight:900;color:var(--cta);margin-bottom:6px}
+.fp-inside-name{font-weight:700;font-size:.95rem;color:var(--text)}
+.fp-inside-desc{font-size:.85rem;color:var(--text-light);margin-top:4px;line-height:1.5}
+
+#fp-benefits{background:var(--bg-alt);padding:60px 0;text-align:center}
+.fp-benefits-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:32px;text-align:center}
+.fp-benefit-card{background:#fff;border-radius:12px;padding:24px 20px;box-shadow:0 2px 10px rgba(0,0,0,.06)}
+.fp-benefit-icon{font-size:2rem;margin-bottom:10px}
+.fp-benefit-name{font-weight:700;font-size:.95rem;margin-bottom:6px;color:var(--text)}
+.fp-benefit-desc{font-size:.85rem;color:var(--text-light);line-height:1.5}
+
+#fp-bonuses{background:var(--bg);padding:60px 0;text-align:center}
+.fp-bonus-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:20px;margin-top:32px}
+.fp-bonus-card{background:#fff;border-radius:12px;overflow:hidden;box-shadow:0 3px 16px rgba(0,0,0,.09);text-align:left}
+.fp-bonus-card img{width:100%;aspect-ratio:3/2;object-fit:cover}
+.fp-bonus-body{padding:18px 20px}
+.fp-bonus-tag{font-family:var(--font-head);font-size:.7rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--cta);margin-bottom:8px}
+.fp-bonus-name{font-weight:700;font-size:1rem;color:var(--text);margin-bottom:6px}
+.fp-bonus-desc{font-size:.85rem;color:var(--text-light);line-height:1.6}
+.fp-bonus-included{display:inline-block;margin-top:10px;background:var(--green);color:#fff;font-size:.75rem;font-weight:700;padding:4px 12px;border-radius:99px;text-transform:uppercase}
+
+#fp-offer{background:var(--bg-dark);color:#fff;padding:60px 0;text-align:center;scroll-margin-top:24px}
+#fp-offer .fp-section-title{color:#fff}
+.fp-offer-badge{display:inline-block;background:var(--cta);color:#fff;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:5px 14px;border-radius:99px;margin-bottom:18px}
+.fp-offer-original{font-size:1.1rem;color:#7a9dbf;text-decoration:line-through;margin-bottom:4px}
+.fp-offer-price{font-family:var(--font-head);font-size:clamp(3rem,8vw,5rem);font-weight:900;color:#fff;line-height:1;margin-bottom:4px}
+.fp-offer-note{font-size:.85rem;color:#7a9dbf;margin-bottom:28px}
+.fp-offer-box{background:rgba(255,255,255,.07);border:2px dashed rgba(255,255,255,.2);border-radius:12px;padding:24px;max-width:560px;margin:0 auto 28px;text-align:left}
+.fp-offer-box-title{font-family:var(--font-head);font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--cta);margin-bottom:14px}
+.fp-offer-includes{list-style:none}
+.fp-offer-includes li{padding:7px 0;border-bottom:1px solid rgba(255,255,255,.08);font-size:.9rem;color:#c5d9ea;display:flex;align-items:flex-start;gap:8px}
+.fp-offer-includes li:last-child{border-bottom:none}
+.fp-offer-includes .oi-check{color:var(--green);flex-shrink:0;margin-top:1px}
+.fp-trust{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 24px;margin-top:18px;color:#7a9dbf;font-size:.8rem}
+.fp-trust span::before{content:"🔒 "}
+.fp-trust span:nth-child(2)::before{content:"⚡ "}
+.fp-trust span:nth-child(3)::before{content:"✅ "}
+
+#fp-guarantee{background:var(--bg-alt);padding:50px 0;text-align:center}
+.fp-guarantee-inner{max-width:600px;margin:0 auto;background:#fff;border-radius:16px;padding:36px;box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.fp-guarantee-badge{font-size:3rem;margin-bottom:14px}
+.fp-guarantee-title{font-family:var(--font-head);font-size:1.3rem;font-weight:800;text-transform:uppercase;margin-bottom:12px;color:var(--text)}
+.fp-guarantee-text{color:var(--text-light);line-height:1.7;font-size:.95rem}
+
+#fp-steps{background:var(--bg);padding:60px 0;text-align:center}
+.fp-steps-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:36px}
+.fp-step{background:var(--bg-alt);border-radius:12px;padding:28px 20px}
+.fp-step-num{font-family:var(--font-head);font-size:2.5rem;font-weight:900;color:var(--cta);margin-bottom:10px}
+.fp-step-label{font-size:.7rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);margin-bottom:8px}
+.fp-step-name{font-weight:700;font-size:1rem;margin-bottom:6px}
+.fp-step-desc{font-size:.85rem;color:var(--text-light);line-height:1.5}
+
+#fp-faq{background:var(--bg-alt);padding:60px 0}
+.fp-faq-list{max-width:680px;margin:32px auto 0;display:flex;flex-direction:column;gap:10px}
+.fp-faq-item{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 6px rgba(0,0,0,.06)}
+.fp-faq-q{width:100%;background:none;border:none;text-align:left;padding:18px 20px;font-family:var(--font-body);font-size:.95rem;font-weight:700;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.fp-faq-q::after{content:"+";font-size:1.3rem;color:var(--accent);flex-shrink:0;transition:transform .2s}
+.fp-faq-q[aria-expanded="true"]::after{transform:rotate(45deg)}
+.fp-faq-a{max-height:0;overflow:hidden;transition:max-height .3s ease;font-size:.9rem;color:var(--text-light);line-height:1.7}
+.fp-faq-a.open{max-height:300px}
+.fp-faq-a-inner{padding:0 20px 18px}
+
+#fp-cta-final{background:var(--bg-dark);color:#fff;padding:70px 0;text-align:center}
+.fp-cta-final-title{font-family:var(--font-head);font-size:clamp(1.4rem,3.5vw,2rem);font-weight:800;text-transform:uppercase;margin-bottom:16px}
+.fp-cta-final-sub{color:#c5d9ea;max-width:560px;margin:0 auto 32px;line-height:1.7}
+.fp-cta-final-img{max-width:320px;margin:32px auto 0;opacity:.9;border-radius:10px}
+
+#fp-footer{background:var(--bg-dark2);color:#7a9dbf;padding:30px 0;text-align:center;font-size:.8rem}
+.fp-footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:8px 20px;margin-bottom:12px}
+.fp-footer-links a{color:#7a9dbf}
+.fp-footer-disclaimer{max-width:660px;margin:12px auto 0;font-size:.75rem;line-height:1.6;color:#4a6580}
+
+@media(max-width:520px){
+  .fp-compare-grid,.fp-target-grid,.fp-inside-grid,.fp-steps-grid{grid-template-columns:1fr}
+  .fp-target-img{height:160px}
+  .fp-btn-full{font-size:.9rem;padding:16px}
+  .fp-offer-price{font-size:3.5rem}
+  .fp-carousel{justify-content:flex-start}
+  .fp-carousel-item{flex:0 0 140px}
+}
+@media(max-width:380px){
+  .fp-container{padding:0 12px}
+  .fp-bonus-grid,.fp-benefits-grid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- STICKY BAR -->
+<div id="fp-sticky" class="fp-hidden">
+  <span style="color:#a8c8e8;font-size:.9rem">KÉREM A VIZUÁLIS KÖNYVTÁRAT —</span>
+  <a href="https://izomterkep.impultienda.ar">€13,70 ↓</a>
+</div>
+
+<!-- 1. HERO -->
+<section id="fp-hero">
+  <div class="fp-container">
+    <div class="fp-hero-badge">Vizuális Útmutató · Digitális Formátum</div>
+    <h1 class="fp-hero-title">Sajátítsd el az irradiáló fájdalom és a triggerpontok tanulmányát<br>+100 vizuális térképpel</h1>
+    <p class="fp-hero-sub">Tanuld meg felismerni az izmokat, tanulmányozni a triggerpontokat és megérteni az irradiáló fájdalom mintázatait – egyértelmű, rendezett és könnyen ismételhető anatómiai illusztrációkkal.</p>
+    <div class="fp-hero-stats">
+      <span>110 illusztrált térkép</span>
+      <span>Testtájék szerint rendezve</span>
+      <span>Diákok és szakemberek számára</span>
+    </div>
+    <a href="#fp-offer" class="fp-btn">IGEN, KÉREM A +100 VIZUÁLIS TÉRKÉPEMET</a>
+    <img class="fp-hero-img" src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220755300_mockup-973fcf83.webp" alt="Vizuális Fájdalomtérkép Atlas — termék mockup" loading="eager">
+  </div>
+</section>
+
+<!-- 2. PREVIEW -->
+<section id="fp-preview">
+  <div class="fp-container">
+    <div class="fp-section-label">Előnézet</div>
+    <h2 class="fp-section-title">Nézd meg, milyen az anyag belülről</h2>
+    <p class="fp-section-sub">Fedezd fel, hogyan mutatjuk be az izmokat, a triggerpontokat és az irradiáló fájdalom mintázatait – vizuálisan és rendezetten.</p>
+    <div class="fp-carousel">
+      <div class="fp-carousel-item"><img src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220760226_mapa-01-f29f7378.webp" alt="Felső Trapézizom" loading="lazy"><div class="fp-carousel-caption">Felső Trapézizom</div></div>
+      <div class="fp-carousel-item"><img src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220764801_mapa-02-57fbe1a2.webp" alt="Infraspinatus" loading="lazy"><div class="fp-carousel-caption">Infraspinatus</div></div>
+      <div class="fp-carousel-item"><img src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220769376_mapa-03-c2441eac.webp" alt="Négyszögletes Ágyékizom" loading="lazy"><div class="fp-carousel-caption">Négyszögletes Ágyékizom</div></div>
+      <div class="fp-carousel-item"><img src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220774246_mapa-04-8d604f1b.webp" alt="Középső Farizom" loading="lazy"><div class="fp-carousel-caption">Középső Farizom</div></div>
+      <div class="fp-carousel-item"><img src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220778689_mapa-05-26e7088f.webp" alt="Mediális Gastrocnemius" loading="lazy"><div class="fp-carousel-caption">Mediális Gastrocnemius</div></div>
+    </div>
+    <img class="fp-demo-img" src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220783461_mapa-demo-2ab887d9.webp" alt="Minta oldal: Felső Trapézizom" loading="lazy">
+    <a href="#fp-offer" class="fp-btn" style="margin-top:28px">EZEKKEL A TÉRKÉPEKKEL SZERETNÉK TANULNI</a>
+  </div>
+</section>
+
+<!-- 3. COMPARE -->
+<section id="fp-compare">
+  <div class="fp-container">
+    <div class="fp-section-label" style="text-align:center">Különbség</div>
+    <h2 class="fp-section-title" style="text-align:center">Ne veszz el a könyvek, jegyzetek<br>és végtelen magyarázatok között</h2>
+    <p class="fp-section-sub" style="text-align:center">Az izomantómia és az irradiáló fájdalom tanulmányozása sokkal rendezettebb lehet, ha a vizuális hivatkozásokat egy helyen gyűjtöd össze.</p>
+    <div class="fp-compare-grid">
+      <div class="fp-compare-col col-bad">
+        <div class="fp-compare-head">✗ Vizuális Térképek Nélkül</div>
+        <ul class="fp-compare-list">
+          <li>Szétszórt információ könyvekben és jegyzetekben.</li>
+          <li>Nehézség az izmok és funkcióik megjegyzésében.</li>
+          <li>Zavar az irradiáló fájdalom különböző mintázatainál.</li>
+          <li>Túl sok idő illusztrációk keresésével.</li>
+          <li>Terjedelmes és kevésbé praktikus ismétlések.</li>
+          <li>Nehézség az elmélet és az anatómia összekapcsolásában.</li>
+        </ul>
+      </div>
+      <div class="fp-compare-col col-good">
+        <div class="fp-compare-head">✓ Vizuális Térképekkel</div>
+        <ul class="fp-compare-list">
+          <li>110 térkép egy rendezett könyvtárban.</li>
+          <li>Izmok bemutatva egyértelmű illusztrációkkal.</li>
+          <li>Irradiáló fájdalom mintázatok vizuálisan ábrázolva.</li>
+          <li>Tartalom testtájékek szerint szétválasztva.</li>
+          <li>Szervezettebb és praktikusabb ismétlések.</li>
+          <li>Könnyen megtekinthető anatómiai hivatkozások.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 4. TARGET -->
+<section id="fp-target">
+  <div class="fp-container">
+    <div class="fp-section-label">Kinek szól?</div>
+    <h2 class="fp-section-title">Fizioterápiát vagy kinesiológiát tanulsz,<br>illetve ezeken a területeken dolgozol?<br>Ez az anyag neked szól.</h2>
+    <div class="fp-target-grid">
+      <div class="fp-target-card">
+        <img class="fp-target-img" src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220803580_estudiantes-a3e136bf.webp" alt="Fizioterápiás diák" loading="lazy">
+        <div class="fp-target-body">
+          <div class="fp-target-label">Diákok Számára</div>
+          <p class="fp-target-intro">Ha fizioterápiát, kinesiológiát vagy egészségtudományokat tanulsz, ez az anyag segít:</p>
+          <ul class="fp-check-list">
+            <li>Vizsgafelkészülésben.</li>
+            <li>Izomantómiai ismétlésekben.</li>
+            <li>Irradiáló fájdalom mintázatainak tanulmányozásában.</li>
+            <li>Az előadások és felügyelt gyakorlatok kiegészítéseként.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="fp-target-card">
+        <img class="fp-target-img" src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220808096_profesionales-505497da.webp" alt="Fizioterápiás szakember" loading="lazy">
+        <div class="fp-target-body">
+          <div class="fp-target-label">Szakemberek Számára</div>
+          <p class="fp-target-intro">Ha fizioterápiában, osteopátiában vagy kapcsolódó területeken dolgozol, ez az anyag hasznos:</p>
+          <ul class="fp-check-list">
+            <li>Gyors vizuális hivatkozásként klinikai munkában.</li>
+            <li>Ismeretek felfrissítésére konkrét izmokról.</li>
+            <li>Oktatási segédanyagként páciensek számára.</li>
+            <li>Fájdalomminták szisztematikus áttekintéseként.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5. MODULES -->
+<section id="fp-modules">
+  <div class="fp-container">
+    <div class="fp-section-label">Tartalom</div>
+    <h2 class="fp-section-title">110 Vizuális Térkép 10 Modulba Rendezve</h2>
+    <div class="fp-modules-grid">
+      <div class="fp-module-card"><div class="fp-module-num">1. Modul</div><div class="fp-module-name">Az Irradiáló Fájdalom Alapjai</div><div class="fp-module-count">Bevezető fejezet</div></div>
+      <div class="fp-module-card"><div class="fp-module-num">2. Modul</div><div class="fp-module-name">Fej és Arc</div><div class="fp-module-count">8 térkép</div></div>
+      <div class="fp-module-card"><div class="fp-module-num">3. Modul</div><div class="fp-module-name">Nyak és Nyaki Régió</div><div class="fp-module-count">10 térkép</div></div>
+      <div class="fp-module-card"><div class="fp-module-num">4. Modul</div><div class="fp-module-name">Váll és Lapockaöv</div><div class="fp-module-count">12 térkép</div></div>
+      <div class="fp-module-card"><div class="fp-module-num">5. Modul</div><div class="fp-module-name">Felkar, Alkar és Kéz</div><div class="fp-module-count">14 térkép</div></div>
+      <div class="fp-module-card"><div class="fp-module-num">6. Modul</div><div class="fp-module-name">Mellkas, Hát és Háti Régió</div><div class="fp-module-count">12 térkép</div></div>
+      <div class="fp-module-card"><div class="fp-module-num">7. Modul</div><div class="fp-module-name">Ágyéki és Hasi Régió</div><div class="fp-module-count">12 térkép</div></div>
+      <div class="fp-module-card"><div class="fp-module-num">8. Modul</div><div class="fp-module-name">Csípő, Medence és Farizom Régió</div><div class="fp-module-count">12 térkép</div></div>
+      <div class="fp-module-card"><div class="fp-module-num">9. Modul</div><div class="fp-module-name">Comb és Térd</div><div class="fp-module-count">10 térkép</div></div>
+      <div class="fp-module-card"><div class="fp-module-num">10. Modul</div><div class="fp-module-name">Lábszár, Boka és Lábfej</div><div class="fp-module-count">10 térkép</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 6. INSIDE -->
+<section id="fp-inside">
+  <div class="fp-container">
+    <div class="fp-section-label">Részletesebben</div>
+    <h2 class="fp-section-title">Sokkal Több, Mint Egy Egyszerű<br>Anatómiai Illusztráció</h2>
+    <p class="fp-section-sub">Minden térkép hat kulcsfontosságú elemet tartalmaz a teljes megértéshez.</p>
+    <div class="fp-inside-grid">
+      <div class="fp-inside-item"><div class="fp-inside-num">01</div><div class="fp-inside-name">Izomfelismerés</div><div class="fp-inside-desc">Vizuálisan azonosítsd a célizmot helyzetével és elhelyezkedésével.</div></div>
+      <div class="fp-inside-item"><div class="fp-inside-num">02</div><div class="fp-inside-name">Lényeges Anatómia</div><div class="fp-inside-desc">Eredet, tapadás és a legfontosabb anatómiai vonatkoztatási pontok.</div></div>
+      <div class="fp-inside-item"><div class="fp-inside-num">03</div><div class="fp-inside-name">Triggerpont-hivatkozások</div><div class="fp-inside-desc">Az egyes izmok leggyakoribb triggerpont-elhelyezkedéseinek megjelölése.</div></div>
+      <div class="fp-inside-item"><div class="fp-inside-num">04</div><div class="fp-inside-name">Irradiáló Fájdalom Mintázatok</div><div class="fp-inside-desc">Vizuális ábrázolása annak, hogy a fájdalom hova sugározhat az egyes izmokból.</div></div>
+      <div class="fp-inside-item"><div class="fp-inside-num">05</div><div class="fp-inside-name">Funkcionális Összefüggések</div><div class="fp-inside-desc">Az izom fő funkciói és kapcsolatai más szerkezetekkel.</div></div>
+      <div class="fp-inside-item"><div class="fp-inside-num">06</div><div class="fp-inside-name">Tanulási Kulcsok</div><div class="fp-inside-desc">Vizuális emlékeztetők és megjegyzési stratégiák a gyorsabb tanuláshoz.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- 7. BENEFITS -->
+<section id="fp-benefits">
+  <div class="fp-container">
+    <div class="fp-section-label" style="text-align:center">Előnyök</div>
+    <h2 class="fp-section-title" style="text-align:center">Tanulj Nagyobb Áttekinthetőséggel<br>és Ismételj Praktikusabban</h2>
+    <div class="fp-benefits-grid">
+      <div class="fp-benefit-card"><div class="fp-benefit-icon">🧠</div><div class="fp-benefit-name">Vizuális Tanulás</div><div class="fp-benefit-desc">Illusztrációkra alapuló tartalom a jobb memorizáláshoz.</div></div>
+      <div class="fp-benefit-card"><div class="fp-benefit-icon">🔄</div><div class="fp-benefit-name">Praktikusabb Ismétlések</div><div class="fp-benefit-desc">Rendezett anyag az egyszerű és gyors ismétléshez.</div></div>
+      <div class="fp-benefit-card"><div class="fp-benefit-icon">📚</div><div class="fp-benefit-name">Rendezett Tartalom</div><div class="fp-benefit-desc">Modulok testtájékek szerint szervezve a jobb tájékozódáshoz.</div></div>
+      <div class="fp-benefit-card"><div class="fp-benefit-icon">📱</div><div class="fp-benefit-name">Digitális Formátum</div><div class="fp-benefit-desc">Bármilyen eszközön elérhető – okostelefon, tablet, számítógép.</div></div>
+    </div>
+    <p style="text-align:center;color:var(--text-light);margin-top:28px;font-size:.9rem;font-style:italic">Oktatási eszköz, amelyet tanulmányaid és szakmai ismereteid kiegészítésére hoztak létre.</p>
+  </div>
+</section>
+
+<!-- 8. BONUSES -->
+<section id="fp-bonuses">
+  <div class="fp-container">
+    <div class="fp-section-label" style="text-align:center">Bónuszok</div>
+    <h2 class="fp-section-title" style="text-align:center">És Ez Még Nem Minden...<br>3 Exkluzív Bónuszt Is Kapsz</h2>
+    <div class="fp-bonus-grid">
+      <div class="fp-bonus-card">
+        <img src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220788096_bono1-ae17d776.webp" alt="Bónusz 1: Vizuális Útmutató a Tapintásos Anatómiához" loading="lazy">
+        <div class="fp-bonus-body">
+          <div class="fp-bonus-tag">1. Bónusz</div>
+          <div class="fp-bonus-name">Vizuális Útmutató a Tapintásos Anatómiához</div>
+          <div class="fp-bonus-desc">Praktikus segédanyag az izmok és csontos struktúrák tapintás útján történő azonosításához.</div>
+          <span class="fp-bonus-included">Bónusz Mellékelve</span>
+        </div>
+      </div>
+      <div class="fp-bonus-card">
+        <img src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220793270_bono2-aca76e6a.webp" alt="Bónusz 2: 30 Miofasciális Mintázat Kártya" loading="lazy">
+        <div class="fp-bonus-body">
+          <div class="fp-bonus-tag">2. Bónusz</div>
+          <div class="fp-bonus-name">30 Miofasciális Mintázat Kártya</div>
+          <div class="fp-bonus-desc">Gyors referenciakártyák a leggyakoribb miofasciális fájdalom mintázatokhoz.</div>
+          <span class="fp-bonus-included">Bónusz Mellékelve</span>
+        </div>
+      </div>
+      <div class="fp-bonus-card">
+        <img src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220798381_bono3-30a64763.webp" alt="Bónusz 3: Mozgásszervi Ismétlő Munkafüzet" loading="lazy">
+        <div class="fp-bonus-body">
+          <div class="fp-bonus-tag">3. Bónusz</div>
+          <div class="fp-bonus-name">Mozgásszervi Ismétlő Munkafüzet</div>
+          <div class="fp-bonus-desc">Strukturált munkafüzet az izomantómia és triggerpont ismeretek aktív ismétléséhez.</div>
+          <span class="fp-bonus-included">Bónusz Mellékelve</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 9. OFFER -->
+<section id="fp-offer">
+  <div class="fp-container">
+    <div class="fp-offer-badge">Indulási ajánlat</div>
+    <h2 class="fp-section-title">Minden, Amire Szükséged Van a Tanuláshoz<br>és Ismétléshez – Egy Vizuális Könyvtárban</h2>
+    <p style="color:#a8c8e8;margin:12px 0 24px;font-size:1rem">Vidd haza a teljes anyagot mindössze</p>
+    <div class="fp-offer-original">€41,10</div>
+    <div class="fp-offer-price">€13,70</div>
+    <div class="fp-offer-note">Egyszeri fizetés · Digitális hozzáférés · 7 napos garancia</div>
+    <div class="fp-offer-box">
+      <div class="fp-offer-box-title">Ez mind benne van:</div>
+      <ul class="fp-offer-includes">
+        <li><span class="oi-check">✓</span> 110 vizuális térkép irradiáló fájdalomhoz és triggerpontokhoz</li>
+        <li><span class="oi-check">✓</span> 10 modul testtájékek szerint rendezve</li>
+        <li><span class="oi-check">✓</span> Minden térkép 6 részletes anatómiai elemet tartalmaz</li>
+        <li><span class="oi-check">✓</span> 1. Bónusz: Vizuális Útmutató a Tapintásos Anatómiához</li>
+        <li><span class="oi-check">✓</span> 2. Bónusz: 30 Miofasciális Mintázat Kártya</li>
+        <li><span class="oi-check">✓</span> 3. Bónusz: Mozgásszervi Ismétlő Munkafüzet</li>
+        <li><span class="oi-check">✓</span> Azonnali digitális hozzáférés</li>
+      </ul>
+    </div>
+    <a href="https://izomterkep.impultienda.ar" class="fp-btn fp-btn-full" style="max-width:560px;margin:0 auto">IGEN, KÉREM A TELJES VIZUÁLIS KÖNYVTÁRAT — €13,70</a>
+    <div class="fp-trust">
+      <span>Biztonságos fizetés</span>
+      <span>Azonnali hozzáférés</span>
+      <span>7 napos garancia</span>
+    </div>
+  </div>
+</section>
+
+<!-- 10. GUARANTEE -->
+<section id="fp-guarantee">
+  <div class="fp-container">
+    <div class="fp-guarantee-inner">
+      <div class="fp-guarantee-badge">🛡️</div>
+      <div class="fp-guarantee-title">Vásárlásodat 7 Napos Garancia Védi</div>
+      <p class="fp-guarantee-text">Ha bármilyen okból nem vagy elégedett az anyaggal, az első 7 napon belül visszatérítjük a teljes vételárat. Nincs kérdés, nincs feltétel. Próbáld ki teljesen kockázat nélkül.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 11. STEPS -->
+<section id="fp-steps">
+  <div class="fp-container">
+    <div class="fp-section-label" style="text-align:center">Hogyan Kezdj Hozzá</div>
+    <h2 class="fp-section-title" style="text-align:center">Kezdd El a Tanulást<br>3 Egyszerű Lépéssel</h2>
+    <div class="fp-steps-grid">
+      <div class="fp-step">
+        <div class="fp-step-num">01</div>
+        <div class="fp-step-label">1. Lépés</div>
+        <div class="fp-step-name">Vásárolj</div>
+        <div class="fp-step-desc">Kattints a gombra és töltsd ki a rendelési adatokat. A fizetés 100%-ban biztonságos.</div>
+      </div>
+      <div class="fp-step">
+        <div class="fp-step-num">02</div>
+        <div class="fp-step-label">2. Lépés</div>
+        <div class="fp-step-name">Kapd Meg a Hozzáférést</div>
+        <div class="fp-step-desc">Azonnal megkapod az anyag linkjét az e-mail címedre. Nincs várakozás.</div>
+      </div>
+      <div class="fp-step">
+        <div class="fp-step-num">03</div>
+        <div class="fp-step-label">3. Lépés</div>
+        <div class="fp-step-name">Kezdj El Tanulni</div>
+        <div class="fp-step-desc">Nyisd meg az anyagot, válaszd ki a modult és kezdj el tanulni azonnal, bárhol.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 12. FAQ -->
+<section id="fp-faq">
+  <div class="fp-container">
+    <div class="fp-section-label" style="text-align:center">GYIK</div>
+    <h2 class="fp-section-title" style="text-align:center">Gyakran Feltett Kérdések</h2>
+    <div class="fp-faq-list">
+      <div class="fp-faq-item">
+        <button class="fp-faq-q" aria-expanded="false">Ez az anyag diákoknak szól?</button>
+        <div class="fp-faq-a"><div class="fp-faq-a-inner">Igen, ez az anyag kifejezetten diákok számára készült, akik fizioterápiát, kinesiológiát vagy egészségtudományokat tanulnak. Segíti az anatómiai ismeretek elsajátítását vizuális formában.</div></div>
+      </div>
+      <div class="fp-faq-item">
+        <button class="fp-faq-q" aria-expanded="false">Szakembereknek is hasznos?</button>
+        <div class="fp-faq-a"><div class="fp-faq-a-inner">Igen. Már praktizáló fizioterápiások, osteopátok és kapcsolódó területek szakemberei is hasznát veszik gyors vizuális hivatkozásként és ismeretek frissítésére.</div></div>
+      </div>
+      <div class="fp-faq-item">
+        <button class="fp-faq-q" aria-expanded="false">Szükségem van haladó ismeretekre?</button>
+        <div class="fp-faq-a"><div class="fp-faq-a-inner">Nem. Az anyag alapismeretektől egészen a haladó szintig használható. Az anatómia alapjaitól kezdve, vizuálisan, rendezetten mutatja be az izmokat és azok fájdalom mintázatait.</div></div>
+      </div>
+      <div class="fp-faq-item">
+        <button class="fp-faq-q" aria-expanded="false">Ez egy videókurzus?</button>
+        <div class="fp-faq-a"><div class="fp-faq-a-inner">Nem, ez egy digitális vizuális könyvtár, amelyet PDF formátumban kapsz meg. Nem videó, hanem illusztrált referenciaanyag, amelyet bármikor, offline is használhatsz.</div></div>
+      </div>
+      <div class="fp-faq-item">
+        <button class="fp-faq-q" aria-expanded="false">Tanulhatok mobiltelefonról?</button>
+        <div class="fp-faq-a"><div class="fp-faq-a-inner">Igen, a digitális formátum bármilyen eszközön megnyitható: okostelefon, tablet, laptop vagy asztali számítógép. Bárhol hozzáférhetsz az anyaghoz.</div></div>
+      </div>
+      <div class="fp-faq-item">
+        <button class="fp-faq-q" aria-expanded="false">Az anyag fizikai formában is kapható?</button>
+        <div class="fp-faq-a"><div class="fp-faq-a-inner">Nem, ez kizárólag digitális formátumban érhető el. A vásárlás után azonnal letöltheted és elkezdheted használni.</div></div>
+      </div>
+      <div class="fp-faq-item">
+        <button class="fp-faq-q" aria-expanded="false">A három bónusz beleértendő a vásárlásba?</button>
+        <div class="fp-faq-a"><div class="fp-faq-a-inner">Igen, a három bónusz (Tapintásos Anatómia Útmutató, Miofasciális Kártyák és Mozgásszervi Munkafüzet) mind beletartozik az alapárba. Nem kell külön megvenni.</div></div>
+      </div>
+      <div class="fp-faq-item">
+        <button class="fp-faq-q" aria-expanded="false">Kinyomtathatom a térképeket?</button>
+        <div class="fp-faq-a"><div class="fp-faq-a-inner">Igen, az anyagot személyes tanulmányi célokra ki lehet nyomtatni. Ez különösen hasznos lehet, ha szívesebben tanulsz papíron.</div></div>
+      </div>
+      <div class="fp-faq-item">
+        <button class="fp-faq-q" aria-expanded="false">Hogyan kapom meg a vásárlásomat?</button>
+        <div class="fp-faq-a"><div class="fp-faq-a-inner">A fizetés után azonnal e-mailt kapsz a hozzáférési linkkel. A folyamat automatikus, nincs várakozási idő.</div></div>
+      </div>
+      <div class="fp-faq-item">
+        <button class="fp-faq-q" aria-expanded="false">A térképek segítségével diagnosztizálhatom a fájdalom okát?</button>
+        <div class="fp-faq-a"><div class="fp-faq-a-inner">Nem. Ez az anyag kizárólag oktatási célokat szolgál. A minták illusztrációja nem helyettesíti a szakmai értékelést. Diagnózishoz mindig fordulj szakemberhez.</div></div>
+      </div>
+      <div class="fp-faq-item">
+        <button class="fp-faq-q" aria-expanded="false">Van garancia?</button>
+        <div class="fp-faq-a"><div class="fp-faq-a-inner">Igen, 7 napos pénzvisszafizetési garanciát biztosítunk. Ha bármilyen okból nem vagy elégedett, az első 7 napon belül visszafizetjük a vételárat, kérdések nélkül.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13. CTA FINAL -->
+<section id="fp-cta-final">
+  <div class="fp-container">
+    <h2 class="fp-cta-final-title">Hagyj Fel a Szétszórt Információval<br>Való Tanulással</h2>
+    <p class="fp-cta-final-sub">Legyen kéznél több mint 100 vizuális térkép az izomantómia, a triggerpontok és az irradiáló fájdalom mintázatainak megértéséhez, tanulmányozásához és ismétléséhez.</p>
+    <a href="https://izomterkep.impultienda.ar" class="fp-btn fp-btn-full" style="max-width:500px;margin:0 auto;font-size:1.1rem">IGEN, HOZZÁFÉRÉST KÉREK A TÉRKÉPEKHEZ — €13,70</a>
+    <img class="fp-cta-final-img" src="https://aekpgsbqjzqntlbucbts.supabase.co/storage/v1/object/public/store-resources/5b90b128-8a9d-45dd-97eb-74899d6cbc6f/1793220755300_mockup-973fcf83.webp" alt="Termék mockup" loading="lazy">
+  </div>
+</section>
+
+<!-- 14. FOOTER -->
+<footer id="fp-footer">
+  <div class="fp-container">
+    <div class="fp-footer-links">
+      <a href="#">Adatvédelmi Szabályzat</a>
+      <a href="#">Általános Szerződési Feltételek</a>
+      <a href="#">Kapcsolat</a>
+    </div>
+    <p>© 2026 IzomTérkép · +100 Vizuális Térkép az Irradiáló Fájdalomról és Triggerpontokról</p>
+    <p class="fp-footer-disclaimer">Ez az anyag kizárólag oktatási és tájékoztatási célokat szolgál. Nem helyettesíti a szakmai orvosi vagy fizioterápiás tanácsadást, diagnózist vagy kezelést. Mindig fordulj képzett egészségügyi szakemberhez bármilyen egészségügyi kérdéssel kapcsolatban.</p>
+  </div>
+</footer>
+
+<script>
+document.querySelectorAll('.fp-faq-q').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const open=btn.getAttribute('aria-expanded')==='true';
+    document.querySelectorAll('.fp-faq-q').forEach(b=>{b.setAttribute('aria-expanded','false');b.nextElementSibling.classList.remove('open')});
+    if(!open){btn.setAttribute('aria-expanded','true');btn.nextElementSibling.classList.add('open')}
+  });
+});
+try{
+  const sticky=document.getElementById('fp-sticky');
+  const offer=document.getElementById('fp-offer');
+  const cta=document.getElementById('fp-cta-final');
+  const obs=new IntersectionObserver(entries=>{
+    const visible=entries.some(e=>e.isIntersecting);
+    sticky.classList.toggle('fp-hidden',visible);
+  },{threshold:0.1});
+  obs.observe(offer);obs.observe(cta);
+  const heroObs=new IntersectionObserver(entries=>{
+    if(!entries[0].isIntersecting) sticky.classList.remove('fp-hidden');
+    else sticky.classList.add('fp-hidden');
+  },{threshold:0.2});
+  heroObs.observe(document.getElementById('fp-hero'));
+}catch(e){}
+</script>
+</body>
+</html>
